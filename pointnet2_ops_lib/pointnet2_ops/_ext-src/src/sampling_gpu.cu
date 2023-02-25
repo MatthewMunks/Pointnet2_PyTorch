@@ -87,8 +87,8 @@ __global__ void furthest_point_sampling_kernel(
 
   __syncthreads();
   for (int j = 1; j < m; j++) {
-    int besti = 0;
-    float best = -1;
+    int best_index = 0;
+    float largest_distance = -1;
     float x1 = dataset[old * 3 + 0];
     float y1 = dataset[old * 3 + 1];
     float z1 = dataset[old * 3 + 2];
@@ -100,13 +100,13 @@ __global__ void furthest_point_sampling_kernel(
       float mag = (x2 * x2) + (y2 * y2) + (z2 * z2);
       if (mag <= 1e-3) continue;
 
-      float d =
+      float distance =
           (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) + (z2 - z1) * (z2 - z1);
 
-      float d2 = min(d, temp[k]);
-      temp[k] = d2;
-      besti = d2 > best ? k : besti;
-      best = d2 > best ? d2 : best;
+      float distance_min = min(distance, temp[k]);
+      temp[k] = distance_min;
+      best_index = distance_min > largest_distance ? k : best_index;
+      largest_distance = distance_min > largest_distance ? distance_min : largest_distance;
     }
     dists[tid] = best;
     dists_i[tid] = besti;
